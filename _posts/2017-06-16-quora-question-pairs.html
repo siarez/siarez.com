@@ -1,0 +1,246 @@
+---
+layout: post
+title: quora question pairs
+disqus_identifier : c11776ea-2497-474d-a561-00d29180ad01
+feature: true
+publish: true
+image:
+    url: /assets/images/twins.jpg
+    alt: twins
+
+---
+
+<p>
+    <span class="dropcap">T</span>hey have a problem at Quora.com. There are 13+M questions are already on their platform and ~13k questions added everyday.
+    People hop on there and ask questions that have been asked and answered before.
+    It is not humanly possible to read that many questions and flag the duplicates… unless you are <a href="https://youtu.be/sinh-Mn-_RI?t=48s" target="_blank">her</a>.
+</p>
+<p>
+    To address the issue they developed their <a target="_blank" href="https://engineering.quora.com/Semantic-Question-Matching-with-Deep-Learning">own algorithms</a> to detect duplicate question.
+    On top of that, a while ago Quora published their first public dataset of question pairs publicly
+    for machine learning (ML) engineers to see if anyone can come up with a better algorithm to detect duplicate questions,
+    and they created a competition on Kaggle.
+</p>
+<p>
+    Here is how the competition works: ML engineers and ML engineer wannabes -cough-me-cough- who have too much time on their hand (or are not properly supervised at work),
+    download the competition’s training set (which looks like fig. 1) and develop machine learning algorithms that learn by going through the examples in the training set.
+    The training set  is usually manually labeled. In this case, 1 or 0 in the is_duplicate column indicates whether the questions are identical.
+    Here the training set contains ~420K question pairs.
+</p>
+<figure class="figure">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>question1</th>
+                <th>question2</th>
+                <th>is_duplicate</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Why my answers are collapsed?</td>
+                <td>Why is my answer collapsed at once?</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>How do I post a question in Quora?</td>
+                <td>How do I ask a question in Quora?</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Can I fit my booboos in a 65ml jar?</td>
+                <td>Is 1 baba worth 55 booboo (おっぱい)  ☃?</td>
+                <td>0</td>
+            </tr>
+        </tbody>
+    </table>
+    <figcaption class="figure-caption">Fig.1</figcaption>
+</figure>
+<p>
+    Beside the training set, they also publish a test set which does not have the answers (is_duplicate column is empty).
+    Your job is to develop an algorithm that learns to detect a duplicate question pair by looking at the training dataset.
+    After it is done learning, you’ll have it go through each question pair in the test set and fill out the is_duplicate column.
+    There are 2,345,796 question pairs in the test set.
+</p>
+<p>
+    Recently, I decided to pick up on an old passion of mine which is AI and ML.
+    I also find Natural Language Processing/Understanding (NLP/U) very fascinating.
+    This project was the sweet spot of all those things.
+    Plus, I could use it as an excuse to sharpen my Python skills, and learn Tensorflow.
+    I decided to use a couple of different models on this problem, all using Tensorflow.
+</p>
+<h2>linear regression on cosine similarity</h2>
+<p>
+    First to get my feet wet and establish a baseline, I coded up a very basic logistic regression model in Tensorflow.
+    The model took only one feature as input, and that was cosine similarity of two sentences.
+    Where each word in a question was represented by a vector from the pre-trained <a href="https://nlp.stanford.edu/projects/glove/" target="_blank" >GloVe</a> word vector.
+    This way each question becomes a matrix. Multiplying the matrices, summing up the elements,
+    and normalizing by question lengths should give us a number (feature) that is proportional to how similar the questions are.
+    I called this feature the <i>overlap_score</i>.
+    This should work for two reasons:
+</p>
+<ol>
+    <li>
+        <p>If a word is present in both questions,
+            then dot product of that word by itself gives highest possible result, 1 (vectors are normalized)
+        </p>
+    </li>
+    <li>
+        <p>Word vectors of synonym words most often have similar vectors.
+            Which again means their dot product should be a higher number. </p>
+    </li>
+</ol>
+<p>
+    So this feature should not only capture same word appearing in the questions,
+    but also a word and its synonyms.
+    This is great, right?! right?!
+</p>
+<p>
+    If you have been into machine learning, you know that one feature doesn’t get you very far.
+    So needless to say, my single feature logistic regression had an accuracy that was slightly better than chance!
+    facing the horrible performance, I decided to plot this feature against the ground truth to see if a relationship can be seen.
+    fig. 2 shows how the overlap_score is related to the ground truth.
+    As you can see there is no obvious relationship between the two.
+</p>
+<figure class="figure">
+    <img class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/figure_1_with_normalization_whole_data.png">
+    <figcaption class="figure-caption">Fig.2</figcaption>
+</figure>
+<p>
+    At this point I could try adding more features.
+    That would have a definitely improved the result (as described by Abhishek <a href="https://www.linkedin.com/pulse/duplicate-quora-question-abhishek-thakur" target="_blank" >here</a>),
+    but I wanted to try something sexier than logistic regression.
+</p>
+<h2>RNN fun</h2>
+<p>
+    Since my renewed interest in machine learning, I came across a very interesting concept of recurrent neural networks or RNNs.
+    Simply put, RNNs are a type of network that receives as part of its input, its output from the previous time step.
+    So they are great for learning variable length sequences which is what sentences are.
+    <a href="http://karpathy.github.io/2015/05/21/rnn-effectiveness/" target="_blank">Here is a great post, if you want to learn more about RNNs</a>.
+</p>
+<p>
+    So I started experimenting with a character level RNN implemented in Tensorflow.
+    To get my feet wet with RNNs, I had a very simple strategy.
+    During training I would concatenate question1, question2, and is_duplicate like this:
+</p>
+<code>Why my answers are collapsed?Why is my answer collapsed at once?(NUL)0
+</code>
+<p>I added a (NUL) ASCII character before is_duplicate to help the RNN learn that it should only output either a 0 or a 1 after the (NUL) and not any other character.
+    My aim was to keep pumping these sequences in the RNN and hope it learns to predict is_duplicate correctly.
+    (Yea, I'm that optimistic.)
+</p>
+<p>
+    This is a pretty bad strategy for many reasons.
+    For one, because RNNs tend to put more weight on the last inputs in the sequence.
+    So q1 would have less bearing on the prediction than q2, just because it is seen earlier and at the time of prediction is already distant memory.
+    There are ways around this like bi-directional RNNs.
+    But, my goal was more to play around with an RNN than to create a good model, so I stopped spending more time on this.
+    I can report that the model did learn to predict ones and zeros, but I didn’t spend enough effort to measure its performance.
+    From looking at the output, I was pretty sure it wasn’t going to be impressive.
+    So I moved to my next shiny strategy.
+</p>
+<h2>Decomposable Attention Model</h2>
+<p>
+    One day during my morning swim in arxiv.org, I came across a curious paper titled: A Decomposable Attention Model for Natural Language Inference.
+    The authors bragged about the state of the art performance of their model with an order of magnitude less variables than the next best thing.
+    With about a week to go to the competition deadline, I decided to give this ago, and implemented their model in Tensorflow.
+</p>
+<p>
+    The model was originally tested on the Stanford Natural Language Inference (SNLI) dataset by the authors of the paper.
+    I adapted this model for use in the Quora competition. Fig. 3 below depicts the model.
+    Notice that the model is symmetric, and I didn’t draw the left side.
+    (In my implementation, F, G, and H are each two layers deep. So this is not a very deep model overall. )
+</p>
+<figure class="figure">
+    <img class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/quora-kaggle-model-diagram.png">
+    <figcaption class="figure-caption">Fig.3</figcaption>
+</figure>
+<h3>Training</h3>
+<p>
+    I used vanilla SGD with constant learning rate.
+    I spent very little time tuning the hyper parameters, just enough to make sure the loss is decreasing.
+    Fig. 4 shows that the cross validation accuracy flats out and stays around 0.82 after 10 epochs.
+</p>
+<figure class="figure">
+    <img class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/x-val_accuracy.png">
+    <figcaption class="figure-caption">Fig.4</figcaption>
+</figure>
+<p>
+    Then I let the model run for 50 epochs. Fig. 5 shows the accuracy on the training set.
+</p>
+<figure class="figure">
+    <img class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/training_loss_50epochs.png">
+    <figcaption class="figure-caption">Fig.5</figcaption>
+</figure>
+<p>
+    Comparing this to fig. 4, you'll see even though the accuracy on x-val set flats out after about 4 epochs,
+    The accuracy on the training set keeps going up.
+</p>
+<h3>Performance - speed</h3>
+<p>
+    As you can see from fig. 4 and fig. 5 the model is not very fast.
+    That is attributed to the fact that my implementation doesn’t use batching. Here is why:
+</p>
+<p>
+    The sentences come in various lengths, then they are multiplied together and concatenated and so on.
+    This creates matrices of various sizes along the way which makes batching difficult.
+    You are probably thinking <i>why not pad all sentence to a fix length?</i>
+    The average sentence length is ~12 words with standard deviation of 6 words, and the longest sentence is ~123 words.
+    So padding all sentences to 123 words, would not yield any gains.
+</p>
+<p>
+    One way to overcome this issue is to bucket the sentences according to their lengths, and padding sentences in each bucket to max length of that bucket.
+    For instance, sentences in with length 0 to 20 will be padded to 20, sentences with length between 20 to 40 will be padded to 40, and so on.
+    This way groups of sentences with the same length can be batched together.
+    However, the deadline was fast approaching, so I didn’t implement this bucketing and batching approach.
+</p>
+<p>
+    Without any batching, the gains from using a GPU were not that impressive.
+    The model processes ~220 sentence pairs per second on my dedicated linux box with a GTX-1060 6Gb GPU where GPU utilization stands around 10%.
+    The model runs at ~160 sentence pairs per second on my 2013 MacBook Pro with 2.4GHz i5 CPU.
+    (As a side note, I saw a 12x speed improvement with my GPU on the Tensorflow’s PTB example!)
+</p>
+
+<h3>Performance - accuracy</h3>
+<p>
+    The model achieved ~95% accuracy on training data and 82% on x-val. set after 50 epochs (Which is similar to what Quora’s internal team had achieved with the same method).
+    This model achieved a logloss of 0.448 on the competition test set, which landed me at ~2200 on the leaderboard.
+    To put this in perspective, first team on the leaderboard had a logloss of 0.116.
+</p>
+<h3>Future improvements</h3>
+<p>
+    Time did not allow me to use TF-IDF, Stop Words, any kind of feature engineering, or ensembling and gradient boosting.
+    I also didn’t implement the “infra-sentence” attention explained in the paper.
+    Also for the sake of simplicity, I used a pretty crude pre-processing technique that gets entirely rid of some useful information that the model could leverage, like numbers and out-of-vocabulary words.
+    I think all these areas of improvement are worth exploring and would result in noticeable improvement.
+</p>
+<h3>Unforeseen challenges</h3>
+<p>
+    One problem that I spent a ridiculous amount of time on was reading the CSV files and feeding them to Tensorflow.
+    Both Python’s CSV reader and <a href="https://www.tensorflow.org/programmers_guide/reading_data#csv_files" target="_blank">Tensorflow’s CSV decoder</a> threw exceptions at various points in the file.
+    The only hassle free CSV reader was the one from <a href="https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html" target="_blank">Pandas</a>.
+</p>
+<p>
+    Tensorflow documentation can also be a lot better.
+    A lot of the times, I found myself looking at the code rather than the documentation to understand what it’s doing.
+    This is something that I expect to get better as Tensorflow matures. Right now, things are moving too fast.
+</p>
+<h3>Code</h3>
+<p>
+    My Tensorflow code for the Decomposable Attention Model can be found here:
+    <a href="https://github.com/siarez/sentence_pair_classifier" target="_blank">siarez/sentence_pair_classifier</a>
+</p>
+<h2>further reading</h2>
+<p>
+    If you are interested in learning more about what others have done for this competition make sure to check these links:
+</p>
+<ul>
+    <li><a href="https://engineering.quora.com/Semantic-Question-Matching-with-Deep-Learning" target="_blank">Semantic Question Matching with Deep Learning</a></li>
+    <li><a href="https://explosion.ai/blog/quora-deep-text-pair-classification" target="_blank">Deep text-pair classification with Quora’s 2017 question dataset</a></li>
+    <li><a href="http://www.erogol.com/duplicate-question-detection-deep-learning/" target="_blank">Duplicate Question Detection with Deep Learning on Quora Dataset</a></li>
+    <li><a href="https://www.linkedin.com/pulse/duplicate-quora-question-abhishek-thakur" target="_blank">Is That a Duplicate Quora Question?</a></li>
+</ul>
