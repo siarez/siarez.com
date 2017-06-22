@@ -1,1 +1,17 @@
+# Site settings
+title: siarez.com
+email: sia@siarez.com
+description: > # this means to ignore newlines until "baseurl:"
+    This the personal website of Sia Rezaei.
+    Here I write about lessons learned from my ventures in Machine Learning,
+    Artificial Intelligence, technology geekery, and entrepreneurship.
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://www.siarez.com" # the base hostname & protocol for your site
+github_username:  siarez
+
+# Build settings
+markdown: kramdown
+permalink: /projects/:title
+gems:
+- jekyll-sitemap
 
