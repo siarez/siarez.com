@@ -10,22 +10,25 @@ permalink: projects/
     <div class="row" style="height:60vh;">
     </div>
     <div class="row justify-content-md-center" style="background-color:rgba(255, 255, 255, 0.95)">
-        <div class="col-xs-10 col-sm-8 "  >
+        <div class="col-12 col-sm-8"  >
             <h1 class="text-center pt-5">projects</h1>
             <hr class="m-5" />
 
             {% for post in site.posts %}
             {% if post.publish %}
             <div class="row justify-content-md-center" style="padding-bottom:6rem; position:relative">
-                <a class="" style="width:100%; display:inherit" href="{{ post.url | prepend: site.baseurl }}">
-                    <div class="col-sm-4 col-xs-11 " style="">
+                <a class="" style="width:100%; display:inherit; flex-wrap:inherit" href="{{ post.url | prepend: site.baseurl }}">
+                    <div class="col-sm-4 offset-sm-0 col-10 offset-1 " style="">
                         <div  style="width:100%; height:200px; background-position:center center; background-size:cover; background-image:url('{{ site.baseurl }}{{ post.image.url }}')" ></div>
                     </div>
 
-                    <div class="col-sm-7 col-sm-offset-1 col-xs-11 col-xs-offset-1" style="">
-                        <h3 class="blog-text" style="font-variant: small-caps;">{{ post.title }}</h3>
-                        <p class="blog-text">{{ post.excerpt  | strip_html | truncatewords: 30 }}</p>
-                        <span class="blog-text" style="  position: absolute;top: 5px;right: 15px;">{{ post.date | date: "%b %-d, %Y" }}</span>
+                    <div class="col-sm-8 offset-sm-0 col-10 offset-1" style="">
+                        <div>
+                            <h3 class="blog-text" style="font-variant: small-caps;">{{ post.title }}</h3>
+                            <p class="blog-text">{{ post.excerpt  | strip_html | truncatewords: 30 }}</p>
+                        </div>
+                            <span class="blog-text" style="  position: absolute;top: 5px;right: 15px;">{{ post.date | date: "%b %-d, %Y" }}</span>
+
                     </div>
                 </a>
             </div>
