@@ -96,7 +96,7 @@ image:
 </ol>
 <p>
     So this feature should not only capture same word appearing in the questions,
-    but also a word and its synonyms.
+    but also a word and its synonym.
     This is great, right?! right?!
 </p>
 <p>
@@ -145,7 +145,8 @@ image:
 </p>
 <h2>Decomposable Attention Model</h2>
 <p>
-    One day during my morning swim in arxiv.org, I came across a curious paper titled: A Decomposable Attention Model for Natural Language Inference.
+    One day during my morning swim in arxiv.org, I came across a curious paper titled:
+    <a href="https://arxiv.org/pdf/1606.01933v1.pdf" target="_blank">A Decomposable Attention Model for Natural Language Inference</a>.
     The authors bragged about the state of the art performance of their model with an order of magnitude less variables than the next best thing.
     With about a week to go to the competition deadline, I decided to give this ago, and implemented their model in Tensorflow.
 </p>
@@ -186,7 +187,7 @@ image:
     That is attributed to the fact that my implementation doesn’t use batching. Here is why:
 </p>
 <p>
-    The sentences come in various lengths, then they are multiplied together and concatenated and so on.
+    The sentences come in various lengths, then they are multiplied together, concatenated, and so on.
     This creates matrices of various sizes along the way which makes batching difficult.
     You are probably thinking <i>why not pad all sentence to a fix length?</i>
     The average sentence length is ~12 words with standard deviation of 6 words, and the longest sentence is ~123 words.
@@ -199,7 +200,7 @@ image:
     However, the deadline was fast approaching, so I didn’t implement this bucketing and batching approach.
 </p>
 <p>
-    Without any batching, the gains from using a GPU were not that impressive.
+    Without any batching, the gain from using a GPU were not that impressive.
     The model processes ~220 sentence pairs per second on my dedicated linux box with a GTX-1060 6Gb GPU where GPU utilization stands around 10%.
     The model runs at ~160 sentence pairs per second on my 2013 MacBook Pro with 2.4GHz i5 CPU.
     (As a side note, I saw a 12x speed improvement with my GPU on the Tensorflow’s PTB example!)
@@ -214,7 +215,7 @@ image:
 <h3>Future improvements</h3>
 <p>
     Time did not allow me to use TF-IDF, Stop Words, any kind of feature engineering, or ensembling and gradient boosting.
-    I also didn’t implement the “infra-sentence” attention explained in the paper.
+    I also did not implement the “infra-sentence” attention explained in the paper.
     Also for the sake of simplicity, I used a pretty crude pre-processing technique that gets entirely rid of some useful information that the model could leverage, like numbers and out-of-vocabulary words.
     I think all these areas of improvement are worth exploring and would result in noticeable improvement.
 </p>
@@ -226,12 +227,12 @@ image:
 </p>
 <p>
     Tensorflow documentation can also be a lot better.
-    A lot of the times, I found myself looking at the code rather than the documentation to understand what it’s doing.
+    Frequently, I found myself looking at the code rather than the documentation to understand what it’s doing.
     This is something that I expect to get better as Tensorflow matures. Right now, things are moving too fast.
 </p>
 <h3>Code</h3>
 <p>
-    My Tensorflow code for the Decomposable Attention Model can be found here:
+    My Tensorflow implemetaion for the Decomposable Attention Model can be found here:
     <a href="https://github.com/siarez/sentence_pair_classifier" target="_blank">siarez/sentence_pair_classifier</a>
 </p>
 <h2>further reading</h2>

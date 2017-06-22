@@ -100,7 +100,7 @@ p {
   font-size: 2rem;
   font-family: lora, georgia, serif;
   /*     font-family: 'concourse-t3', 'Helvetica Neue', Arial, sans-serif;
-   *     @include font-feature(0, 'ss02')   */
+   *     @include font-feature(0, 'ss02') */
   font-smoothing: antialiased;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale; }
@@ -122,7 +122,7 @@ li {
   font-feature-settings: "liga" 1, "ss02" 1; }
 
 a {
-  color: #f5c77e;
+  color: #f0c176;
   text-decoration: none;
   cursor: pointer; }
   a:hover {
