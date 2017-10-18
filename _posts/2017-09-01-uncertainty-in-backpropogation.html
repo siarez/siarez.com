@@ -1,0 +1,61 @@
+---
+layout: post
+title: uncertainty in backpropogation
+disqus_identifier : 37ca47a2-6503-41f2-b6a4-0802fa950f3a
+feature: false
+publish: false
+image:
+    url: /assets/images/delta-distributions.png
+    alt: twins
+
+---
+
+<p>
+    <span class="dropcap">T</span>hese days I have been spending more time studying statistics and probablity than the papers about new neural network architectures that pop up everyday.
+    to gaining a deeper understanding
+</p>
+<p>
+    To address the issue they developed their <a target="_blank" href="https://engineering.quora.com/Semantic-Question-Matching-with-Deep-Learning">own algorithms</a> to detect duplicate question.
+    On top of that, a while ago Quora published their first public dataset of question pairs publicly
+    for machine learning (ML) engineers to see if anyone can come up with a better algorithm to detect duplicate questions,
+    and they created a competition on Kaggle.
+</p>
+<p>
+    Here is how the competition works: ML engineers and ML engineer wannabes -cough-me-cough- who have too much time on their hand (or are not properly supervised at work),
+    download the competition’s training set (which looks like fig. 1) and develop machine learning algorithms that learn by going through the examples in the training set.
+    The training set  is usually manually labeled. In this case, 1 or 0 in the is_duplicate column indicates whether the questions are identical.
+    Here the training set contains ~420K question pairs.
+</p>
+<figure class="figure">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>question1</th>
+                <th>question2</th>
+                <th>is_duplicate</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Why my answers are collapsed?</td>
+                <td>Why is my answer collapsed at once?</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>How do I post a question in Quora?</td>
+                <td>How do I ask a question in Quora?</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Can I fit my booboos in a 65ml jar?</td>
+                <td>Is 1 baba worth 55 booboo (おっぱい)  ☃?</td>
+                <td>0</td>
+            </tr>
+        </tbody>
+    </table>
+    <figcaption class="figure-caption">Fig.1</figcaption>
+</figure>

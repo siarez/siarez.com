@@ -1,0 +1,94 @@
+---
+layout: post
+title: Backpropagation using random weights
+disqus_identifier : 7af33c9c-1aaa-47f3-9897-f83053f4b4ca
+feature: false
+publish: false
+image:
+    url: /assets/images/twins.jpg
+    alt: twins
+
+---
+
+<p>
+    <span class="dropcap">Y</span>ou propbably know backprop algorithm by heart. You may also have good intuition about why it works, and why it is the way it is.
+I cerainly thought so, until I came across a <a href="https://arxiv.org/abs/1411.0247" target="_blank">paper</a> by Timothy P. Lillicrap et al.
+with a rather counter intuitive claim that using random weights during the backward pass of backprop algorithm works just as well as using the actual network weights!
+This went against my intuition of backprop, so I decided to do a series of experiments to examine it.
+    <a href="https://github.com/siarez/random_feedback_weights" target="_blank">My code</a> is available for anyone who wants to play around with it.
+</p>
+<h2>Backpropagation refresher</h2>
+<p>
+Let’s refresh how backprop works by diving into the math.
+    Specifically the part that is violated by using random weights.
+    The three equations below (which I have liberally taken from <a href="https://en.wikipedia.org/wiki/Backpropagation">Wikipedia</a>) describe the whole of backward pass that happens in backprop algorithm.
+</p>
+<p>
+\[\begin{gathered} {\frac {\partial E}{\partial w_{ij}}}=o_{i}\delta _{j} \\
+
+ \Delta w_{ij}=-\eta {\frac {\partial E}{\partial w_{ij}}}=-\eta o_{i}\delta _{j} \\
+
+ \delta _{j}={\frac {\partial E}{\partial o_{j}}}{\frac {\partial o_{j}}{\partial {\text{net}}_{j}}}={\begin{cases}(o_{j}-t_{j})o_{j}(1-o_{j})&{\text{if }}j{\text{ is an output neuron,}}\\{\color{green}\sum _{\ell \in L}\delta _{\ell }w_{j\ell }}o_{j}(1-o_{j})&{\text{if }}j{\text{ is an inner neuron.}}\end{cases}}
+    \end{gathered} \]
+</p>
+<p>
+The first equation tells us how to calculate the change in Error \(E\) as we change a weight \(w_{ij}\) in the network.
+Knowing that, the second equation calculates the amout that the weight needs to be adjusted \(\Delta w_{ij}\).
+It simply multiplies the devirative from the first equation by the learning rate \(\eta\).
+The (-) sign is there so the adjustment of the weight is in the direction of decreasing \(E\).
+</p>
+
+<p>
+So far easy peasy, because the juicy part is hidding in the calculation of  \(\delta \).
+It has two terms: \(\frac {\partial E}{\partial o_{j}}\) and \(\frac {\partial o_{j}}{\partial {\text{net}}_{j}}\).
+You can see \(\delta \) is calculated differently for the output layer than the hidden layers.
+The \(\frac {\partial o_{j}}{\partial {\text{net}}_{j}}\) is the same for both output and hidden layers.
+It is the \(o_{j}(1-o_{j})\) that you see on the right hand side which is the derivative of the sigmoid function.
+</p>
+<p>
+The part that is different, is the calculation of \({\frac {\partial E}{\partial o_{j}}}\).
+It is pretty obvious for the output layer neurons; It is simply the difference between output and target \(o_{j}-t_{j}\) - (given sequared error is used to calculate\(E\) ).
+</p>
+<p>
+Calculation of \(\frac {\partial E}{\partial o_{j}}\) gets more interesting for a hidden layer neuron (the part in \({\color{green}green}\)).
+That is where the <i>“propagating backward”</i> of the backpropogation algorithm happens.
+Let’s look at it more closely and understand why it looks the the way it does.
+</p>
+<p>
+At first, the term \(\sum _{\ell \in L}\delta _{\ell }w_{j\ell }\) may seem to have been pulled out of a hat.
+    Let’s see if we can derive it from scratch for the network below:
+</p>
+<figure class="figure" >
+    <img style="max-width:30%" class="mx-auto d-block" src="{{site.baseurl}}/assets/images/neural-net.png">
+    <figcaption class="figure-caption">A simple feed forward neural net</figcaption>
+</figure>
+<p>
+We write the squared error first:
+\[ E={\tfrac {1}{2}}\sum _{\ell \in L}(t _{\ell}-o_{\ell })^{2}\]
+</p>
+<p>Now lets replace \(o_{\ell }\) with \(\sigma (o_{j\ell }.w_{j\ell})\)
+\[ E={\tfrac {1}{2}}\sum _{\ell \in L}(t-\sigma (o_{j}w_{j\ell}))^{2} \]
+</p>
+<p>Now we can take the derivative of \(E\) w.r.t. \(o_{j}\).
+    We will have to use chain rule three times. (Each term in the chain rule is colored differently for clarity)
+    \[{\frac {\partial E}{\partial o_{j}}}=\sum _{\ell \in L}{\color{red}(t _{\ell} - \sigma (o_{j}w_{j\ell}))}{\color{blue}\sigma (o_{j}w_{j\ell})(1 - \sigma (o_{j}w_{j\ell}))}{\color{green}w_{j\ell}} \]
+</p>
+<p>If you look closely, you'll see:
+\[\begin{aligned}
+    {\color{red}(t _{\ell} - \sigma (o_{j}w_{j\ell}))}{\color{blue}\sigma (o_{j}w_{j\ell})(1 - \sigma (o_{j}w_{j\ell}))} \\
+    == {\color{red}(t-o_{\ell })}{\color{blue}o_{\ell}(1-o_{\ell})} \\
+    == {\color{purple}\delta _{\ell}}
+    \end{aligned}\]
+</p>
+<p>
+Therefore:
+    \[{\frac {\partial E}{\partial o_{j}}} = \sum _{\ell \in L} {\color{purple}\delta _{\ell}} {\color{green}w_{j\ell}} \]
+</p>
+<p>
+Now with that out of the way let get to the experiment.
+</p>
+<h2>Experiment setup</h2>
+
+
+
+
