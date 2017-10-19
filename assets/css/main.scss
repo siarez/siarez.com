@@ -155,11 +155,27 @@ a {
   color: #f0c176;
   text-decoration: none;
   cursor: pointer;
+  &:hover {
+    color: #f5c77e;
+    text-decoration: none;
+  }
+}
+
+p a, a.nav-link, li a{
+    display: inline;
 
   &:hover {
     color: #f5c77e;
     text-decoration: none;
     border-bottom: 1px solid black;
+  }
+}
+
+.post-block{
+  &:hover {
+    color: #f5c77e;
+    text-decoration: none;
+    border-left: 1px solid black;
   }
 }
 

@@ -16,7 +16,7 @@ permalink: projects/
 
             {% for post in site.posts %}
             {% if post.publish %}
-            <div class="row justify-content-md-center" style="padding-bottom:6rem; position:relative">
+            <div class="row justify-content-md-center post-block" style="margin-bottom:6rem; position:relative">
                 <a class="" style="width:100%; display:inherit; flex-wrap:inherit" href="{{ post.url | prepend: site.baseurl }}">
                     <div class="col-sm-4 offset-sm-0 col-10 offset-1 " style="">
                         <div  style="width:100%; height:200px; background-position:center center; background-size:cover; background-image:url('{{ site.baseurl }}{{ post.image.url }}')" ></div>
