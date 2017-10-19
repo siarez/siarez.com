@@ -136,12 +136,10 @@ p {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
+var {
   font-family: "Lucida Console", Monaco, monospace;
-
-  //background-color: transparent
-  display: block;
-  color: black;
+  font-size: 1.8rem;
+  font-style: normal;
 }
 
 li {

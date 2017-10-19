@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Backpropagation using random weights
+title: backpropagation using random feedback weights
 disqus_identifier : 7af33c9c-1aaa-47f3-9897-f83053f4b4ca
 feature: false
 publish: false
@@ -11,8 +11,8 @@ image:
 ---
 
 <p>
-    <span class="dropcap">Y</span>ou propbably know backprop algorithm by heart. You may also have good intuition about why it works, and why it is the way it is.
-I cerainly thought so, until I came across a <a href="https://arxiv.org/abs/1411.0247" target="_blank">paper</a> by Timothy P. Lillicrap et al.
+    <span class="dropcap">Y</span>ou probably know backprop algorithm by heart. You may also have good intuition about why it works, and why it is the way it is.
+I certainly thought so, until I came across a <a href="https://arxiv.org/abs/1411.0247" target="_blank">paper</a> by Timothy P. Lillicrap et al.
 with a rather counter intuitive claim that using random weights during the backward pass of backprop algorithm works just as well as using the actual network weights!
 This went against my intuition of backprop, so I decided to do a series of experiments to examine it.
     <a href="https://github.com/siarez/random_feedback_weights" target="_blank">My code</a> is available for anyone who wants to play around with it.
@@ -33,13 +33,13 @@ Let’s refresh how backprop works by diving into the math.
 </p>
 <p>
 The first equation tells us how to calculate the change in Error \(E\) as we change a weight \(w_{ij}\) in the network.
-Knowing that, the second equation calculates the amout that the weight needs to be adjusted \(\Delta w_{ij}\).
-It simply multiplies the devirative from the first equation by the learning rate \(\eta\).
+Knowing that, the second equation calculates the amount that the weight needs to be adjusted \(\Delta w_{ij}\).
+It simply multiplies the derivative from the first equation by the learning rate \(\eta\).
 The (-) sign is there so the adjustment of the weight is in the direction of decreasing \(E\).
 </p>
 
 <p>
-So far easy peasy, because the juicy part is hidding in the calculation of  \(\delta \).
+So far easy peasy, because the juicy part is hiding in the calculation of  \(\delta \).
 It has two terms: \(\frac {\partial E}{\partial o_{j}}\) and \(\frac {\partial o_{j}}{\partial {\text{net}}_{j}}\).
 You can see \(\delta \) is calculated differently for the output layer than the hidden layers.
 The \(\frac {\partial o_{j}}{\partial {\text{net}}_{j}}\) is the same for both output and hidden layers.
@@ -47,11 +47,12 @@ It is the \(o_{j}(1-o_{j})\) that you see on the right hand side which is the de
 </p>
 <p>
 The part that is different, is the calculation of \({\frac {\partial E}{\partial o_{j}}}\).
-It is pretty obvious for the output layer neurons; It is simply the difference between output and target \(o_{j}-t_{j}\) - (given sequared error is used to calculate\(E\) ).
+It is pretty obvious for the output layer neurons; 
+It is simply the difference between output and target \(o_{j}-t_{j}\) - (given squared error is used to calculate\(E\) ).
 </p>
 <p>
 Calculation of \(\frac {\partial E}{\partial o_{j}}\) gets more interesting for a hidden layer neuron (the part in \({\color{green}green}\)).
-That is where the <i>“propagating backward”</i> of the backpropogation algorithm happens.
+That is where the <i>“propagating backward”</i> of the backpropagation algorithm happens.
 Let’s look at it more closely and understand why it looks the the way it does.
 </p>
 <p>
@@ -66,7 +67,7 @@ At first, the term \(\sum _{\ell \in L}\delta _{\ell }w_{j\ell }\) may seem to h
 We write the squared error first:
 \[ E={\tfrac {1}{2}}\sum _{\ell \in L}(t _{\ell}-o_{\ell })^{2}\]
 </p>
-<p>Now lets replace \(o_{\ell }\) with \(\sigma (o_{j\ell }.w_{j\ell})\)
+<p>Now let's replace \(o_{\ell }\) with \(\sigma (o_{j\ell }.w_{j\ell})\)
 \[ E={\tfrac {1}{2}}\sum _{\ell \in L}(t-\sigma (o_{j}w_{j\ell}))^{2} \]
 </p>
 <p>Now we can take the derivative of \(E\) w.r.t. \(o_{j}\).
@@ -88,7 +89,147 @@ Therefore:
 Now with that out of the way let get to the experiment.
 </p>
 <h2>Experiment setup</h2>
+<p>
+I took a statistical approach to compare the result of regular backpropagation to backpropagation using random feedback, 
+    so the code repeats the training-testing cycle 30 times and the results are used for a statistical significant test. 
+    In each experiment:
+</p>
+<ul>
+    <li><p>I trained and tested two identical networks for 200 epochs on MNIST dataset, 30 times.</p></li>
+    <li><p>Each time starting from a new set of random weights (w1 and w2) and new random samples from MNIST for training and testing. </p></li>
+    <li><p>Both networks had the same learning rate of 0.07 which was tuned to get the best performance for regular backprop.</p></li>
+    <li><p><var>w2_feedback</var> is scaled up logarithmically with each epoch. This is where I deviate from the paper. I found out this results in faster convergence.</p></li>
+    <li><p>The initial <var>w1</var>(input to hidden) and <var>w2</var>(hidden to output) were identical for both networks. </p></li>
+    <li><p>Both networks are two layers with 784 input (28x28 pixel image) and 10 output units (0 to 9 digits). I experiment with different number of units in the hidden layer.</p></li>
+    <li><p>The only difference between the networks is that I used a normally distributed random weights (<var>w2_feedback</var>) during backprop. 
+        <var>w2_feedback</var> is the \(w_{jl}\) in our math above. Normally the same weights are used during forward and backward pass. 
+        Here we used a random \(w_{jl}\) in the backward pass. <var>w2_feedback</var> reminded constant during training.</p>
+    </li>
+    <li><p>After each training-testing run, accuracy was measured and recorded on the test set. </p></li>
+</ul>
+<p>
+After the experiment, t-test is performed on recorded accuracies of each run to see if there is a significant difference in performance. 
+Results are reported in the table below.
+</p>
+<h2>Results</h2>
+<figure class="figure">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>hidden units</th>
+                <th>training set size</th>
+                <th>test set size</th>
+                <th>avg. accuracy w/ normal Backprop</th>
+                <th>avg. accuracy w/ random feedback Backprop</th>
+                <th>t-test p value</th>
+                <th># of runs</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>20</td>
+                <td>50k</td>
+                <td>10k</td>
+                <td>90.0%</td>
+                <td>93.5%</td>
+                <td>0.003</td>
+                <td>30</td>
+            </tr>
+            <tr>
+                <td>40</td>
+                <td>50k</td>
+                <td>10k</td>
+                <td>96.1%</td>
+                <td>96.0%</td>
+                <td>0.027</td>
+                <td>30</td>
+            </tr>
+        </tbody>
+    </table>
+    <figcaption class="figure-caption">Table.1</figcaption>
+</figure>
+<p>
+Pretty surprising that backprop with random feedback weights learns as well as vanilla backprop! In the case of 20 hidden units it performs even better. 
+    Here are some sample loss plot from training-testing cycles.
+</p>
+<figure class="figure" >
+    <img style="max-width:49%" class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/random_feedback/expr-3-loss.png">
+    <img style="max-width:49%" class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/random_feedback/expr-6-loss.png">
+    <img style="max-width:49%" class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/random_feedback/expr-8-loss.png">
+    <img style="max-width:49%" class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/random_feedback/expr-10-loss.png">
+    <figcaption class="figure-caption">Loss vs. epoch - with 20 hidden units.</figcaption>
+</figure>
+<p>Interestingly the loss plot for the random <var>w2_feedback</var> much smoother.  
+</p>
+<p>
+I’m surprised not more people are talking about this. 
+    It seems like bakcpropagation is taken for granted. 
+    I feel like this should open a new degree of freedom in designing new models,  
+    and we should be able to exploit it somehow.
+</p>
 
-
-
-
+<h2>Post experiment soul searching</h2>
+<p>
+But why this results? I had an intuition that by using a random but fixed <var>w2_feedback</var> during backprop, 
+    neurons in hidden layer learn their incoming weights (<var>w1</var>) to minimize the \(\delta _{\ell}\) of neurons in the output layer that they happen to have a high outgoing weight to. 
+    This kind of explains why the network is still able to learn. Each neuron in the hidden layer is predetermined to fit to a specific output neuron by the random selection of feedback weights.
+</p>
+<p>
+    To test this hypothesis, I measured the correlation between the feedforward <var>w2</var> and the <var>w2_feedback</var> during training. 
+    The figure below also plots the Pearson Correlation between <var>w2</var> and <var>w2_feedback</var> as <var>w2</var> is learned. 
+</p>
+<figure class="figure" >
+    <img style="max-width:100%" class="mx-auto d-block" src="{{site.baseurl}}/assets/images/random_feedback/pearson-r.png">
+    <figcaption class="figure-caption">A simple feed forward neural net</figcaption>
+</figure>
+<p>You can see that Pearson’s r increases as loss decreases, and it usually hovers around 0.75±0.05 by the end of the training. 
+    So there is some truth to my hypothesis. How much truth? r = 0.75 you could say!
+</p>
+<h3>More testing</h3>
+<p>
+To further test my hypothesis, I came up with an extreme case of it. 
+    I decided to predetermine <var>w2_feedback</var>, but not with normally distributed random numbers. 
+    This time, each neuron in the hidden layer should only have one weight in <var>w2_feedback</var> of value <var>1</var>. 
+    <var>w2_feedback</var> is kept constant like before. 
+    Meaning each neuron in the hidden layer only receives \(\delta \) from one output neuron rather than all 10. 
+    That means if we have 20 hidden unit and 10 output units, each output unit has exactly 2 feedback weights + a bias. 
+    Here is the result:
+</p>
+<figure class="figure">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>hidden units</th>
+                <th>training set size</th>
+                <th>test set size</th>
+                <th>avg. accuracy w/ normal Backprop</th>
+                <th>avg. accuracy w/ random feedback Backprop</th>
+                <th>t-test p value</th>
+                <th># of runs</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>20</td>
+                <td>50k</td>
+                <td>10k</td>
+                <td>93.1%</td>
+                <td>93.9%</td>
+                <td>0.007</td>
+                <td>30</td>
+            </tr>
+        </tbody>
+    </table>
+    <figcaption class="figure-caption">Table.2</figcaption>
+</figure>
+<p>
+Surprisingly again, not only the network performs just as well as regular backprop. 
+    (Even slightly better) It works even better than random w2_feedback. 
+    If this scales to larger networks and other topologies it could potentially save a lot of computation resource. 
+    Here the amount of backprop computation from output to hidden layer was reduced by a factor of 20! Perhaps I’ll explore this in a future post.
+</p>
+<p>Here is the <a href="https://github.com/siarez/random_feedback_weights" target="_blank">code</a> again; Happy hacking! 
+</p>
+{%comment%}
+<p tabindex="0" class="btn btn-lg btn-danger" role="button" data-toggle="popover" data-trigger="focus" title="Dismissible popover" data-content="And here's some amazing content. It's very engaging. Right?">Dismissible popover</p>
+{%endcomment%}

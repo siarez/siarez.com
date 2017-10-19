@@ -127,8 +127,7 @@ image:
     To get my feet wet with RNNs, I had a very simple strategy.
     During training I would concatenate question1, question2, and is_duplicate like this:
 </p>
-<code>Why my answers are collapsed?Why is my answer collapsed at once?(NUL)0
-</code>
+<samp>Why my answers are collapsed?Why is my answer collapsed at once?(NUL)0</samp>
 <p>I added a (NUL) ASCII character before is_duplicate to help the RNN learn that it should only output either a 0 or a 1 after the (NUL) and not any other character.
     My aim was to keep pumping these sequences in the RNN and hope it learns to predict is_duplicate correctly.
     (Yea, I'm that optimistic.)
