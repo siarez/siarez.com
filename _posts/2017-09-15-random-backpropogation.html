@@ -43,7 +43,7 @@ So far easy peasy, because the juicy part is hiding in the calculation of  \(\de
 It has two terms: \(\frac {\partial E}{\partial o_{j}}\) and \(\frac {\partial o_{j}}{\partial {\text{net}}_{j}}\).
 You can see \(\delta \) is calculated differently for the output layer than the hidden layers.
 The \(\frac {\partial o_{j}}{\partial {\text{net}}_{j}}\) is the same for both output and hidden layers.
-It is the \(o_{j}(1-o_{j})\) that you see on the right hand side which is the derivative of the sigmoid function.
+It is the \(o_{j}(1-o_{j})\) that you see on the right hand side which is the derivative of our sigmoid activation function.
 </p>
 <p>
 The part that is different, is the calculation of \({\frac {\partial E}{\partial o_{j}}}\).
@@ -67,8 +67,8 @@ At first, the term \(\sum _{\ell \in L}\delta _{\ell }w_{j\ell }\) may seem to h
 We write the squared error first:
 \[ E={\tfrac {1}{2}}\sum _{\ell \in L}(t _{\ell}-o_{\ell })^{2}\]
 </p>
-<p>Now let's replace \(o_{\ell }\) with \(\sigma (o_{j\ell }.w_{j\ell})\)
-\[ E={\tfrac {1}{2}}\sum _{\ell \in L}(t-\sigma (o_{j}w_{j\ell}))^{2} \]
+<p>Now let's replace \(o_{\ell }\) with \(\sigma (o_{j\ell }w_{j\ell})\)
+\[ E={\tfrac {1}{2}}\sum _{\ell \in L}(t_{\ell}-\sigma (o_{j}w_{j\ell}))^{2} \]
 </p>
 <p>Now we can take the derivative of \(E\) w.r.t. \(o_{j}\).
     We will have to use chain rule three times. (Each term in the chain rule is colored differently for clarity)
@@ -77,7 +77,7 @@ We write the squared error first:
 <p>If you look closely, you'll see:
 \[\begin{aligned}
     {\color{red}(t _{\ell} - \sigma (o_{j}w_{j\ell}))}{\color{blue}\sigma (o_{j}w_{j\ell})(1 - \sigma (o_{j}w_{j\ell}))} \\
-    == {\color{red}(t-o_{\ell })}{\color{blue}o_{\ell}(1-o_{\ell})} \\
+    == {\color{red}(t_{\ell}-o_{\ell })}{\color{blue}o_{\ell}(1-o_{\ell})} \\
     == {\color{purple}\delta _{\ell}}
     \end{aligned}\]
 </p>
@@ -96,14 +96,14 @@ I took a statistical approach to compare the result of regular backpropagation t
 </p>
 <ul>
     <li><p>I trained and tested two identical networks for 200 epochs on MNIST dataset, 30 times.</p></li>
-    <li><p>Each time starting from a new set of random weights (w1 and w2) and new random samples from MNIST for training and testing. </p></li>
+    <li><p>Each time starting from a new set of random weights (<var>w1</var>, <var>w2</var>, and <var>w2_feedback</var>) and new random samples from MNIST for training and testing. </p></li>
     <li><p>Both networks had the same learning rate of 0.07 which was tuned to get the best performance for regular backprop.</p></li>
     <li><p><var>w2_feedback</var> is scaled up logarithmically with each epoch. This is where I deviate from the paper. I found out this results in faster convergence.</p></li>
     <li><p>The initial <var>w1</var>(input to hidden) and <var>w2</var>(hidden to output) were identical for both networks. </p></li>
     <li><p>Both networks are two layers with 784 input (28x28 pixel image) and 10 output units (0 to 9 digits). I experiment with different number of units in the hidden layer.</p></li>
     <li><p>The only difference between the networks is that I used a normally distributed random weights (<var>w2_feedback</var>) during backprop. 
-        <var>w2_feedback</var> is the \(w_{jl}\) in our math above. Normally the same weights are used during forward and backward pass. 
-        Here we used a random \(w_{jl}\) in the backward pass. <var>w2_feedback</var> reminded constant during training.</p>
+        <var>w2_feedback</var> is the \(\color{green}w_{j\ell}\) in our math above. Normally the same weights are used during forward and backward pass.
+        Here we used a random \(w_{j\ell}\)(<var>w2_feedback</var> in the code) in the backward pass. <var>w2_feedback</var> reminded constant during training.</p>
     </li>
     <li><p>After each training-testing run, accuracy was measured and recorded on the test set. </p></li>
 </ul>
@@ -149,7 +149,8 @@ Results are reported in the table below.
     <figcaption class="figure-caption">Table.1</figcaption>
 </figure>
 <p>
-Pretty surprising that backprop with random feedback weights learns as well as vanilla backprop! In the case of 20 hidden units it performs even better. 
+Pretty surprising that backprop with random feedback weights learns as well as vanilla backprop!
+    In the case of 20 hidden units, it performs even better.
     Here are some sample loss plot from training-testing cycles.
 </p>
 <figure class="figure" >
@@ -159,7 +160,7 @@ Pretty surprising that backprop with random feedback weights learns as well as v
     <img style="max-width:49%" class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/random_feedback/expr-10-loss.png">
     <figcaption class="figure-caption">Loss vs. epoch - with 20 hidden units.</figcaption>
 </figure>
-<p>Interestingly the loss plot for the random <var>w2_feedback</var> much smoother.  
+<p>Interestingly the loss plot for the random <var>w2_feedback</var> is much smoother.
 </p>
 <p>
 I’m surprised not more people are talking about this. 
@@ -171,11 +172,12 @@ I’m surprised not more people are talking about this.
 <h2>Post experiment soul searching</h2>
 <p>
 But why this results? I had an intuition that by using a random but fixed <var>w2_feedback</var> during backprop, 
-    neurons in hidden layer learn their incoming weights (<var>w1</var>) to minimize the \(\delta _{\ell}\) of neurons in the output layer that they happen to have a high outgoing weight to. 
+    neurons in the hidden layer learn their incoming weights (<var>w1</var>) to minimize the \(\delta _{\ell}\) of neurons in the output layer that they happen to have a high outgoing weight to.
     This kind of explains why the network is still able to learn. Each neuron in the hidden layer is predetermined to fit to a specific output neuron by the random selection of feedback weights.
 </p>
 <p>
-    To test this hypothesis, I measured the correlation between the feedforward <var>w2</var> and the <var>w2_feedback</var> during training. 
+    This hypothesis predicts that the correlation between the feedforward <var>w2</var> and <var>w2_feedback</var> should increase as we train.
+    So to test it, I measured and ploted that correlation.
     The figure below also plots the Pearson Correlation between <var>w2</var> and <var>w2_feedback</var> as <var>w2</var> is learned. 
 </p>
 <figure class="figure" >
