@@ -11,7 +11,7 @@ image:
 ---
 
 <p>
-    <span class="dropcap">Y</span>ou probably know backprop algorithm by heart. You may also have good intuition about why it works, and why it is the way it is.
+    <span class="dropcap">Y</span>ou probably know the backprop algorithm by heart. You may also have good intuitions about why it works, and why it is the way it is.
 I certainly thought so, until I came across a <a href="https://arxiv.org/abs/1411.0247" target="_blank">paper</a> by Timothy P. Lillicrap et al.
 with a rather counter intuitive claim that using random weights during the backward pass of backprop algorithm works just as well as using the actual network weights!
 This went against my intuition of backprop, so I decided to do a series of experiments to examine it.
@@ -19,9 +19,8 @@ This went against my intuition of backprop, so I decided to do a series of exper
 </p>
 <h2>Backpropagation refresher</h2>
 <p>
-Let’s refresh how backprop works by diving into the math.
-    Specifically the part that is violated by using random weights.
-    The three equations below (which I have liberally taken from <a href="https://en.wikipedia.org/wiki/Backpropagation">Wikipedia</a>) describe the whole of backward pass that happens in backprop algorithm.
+Let’s take a refresher on how backprop works by diving straight into the math, specifically the part that is affected by using random weights.
+    The three equations below (which I have liberally taken from <a href="https://en.wikipedia.org/wiki/Backpropagation">Wikipedia</a>) describe the backward pass of the backprop algorithm.
 </p>
 <p>
 \[\begin{gathered} {\frac {\partial E}{\partial w_{ij}}}=o_{i}\delta _{j} \\
@@ -48,7 +47,7 @@ It is the \(o_{j}(1-o_{j})\) that you see on the right hand side which is the de
 <p>
 The part that is different, is the calculation of \({\frac {\partial E}{\partial o_{j}}}\).
 It is pretty obvious for the output layer neurons; 
-It is simply the difference between output and target \(o_{j}-t_{j}\) - (given squared error is used to calculate\(E\) ).
+It is simply the difference between output and target \(o_{j}-t_{j}\) (given that squared error is used to calculate\(E\) ).
 </p>
 <p>
 Calculation of \(\frac {\partial E}{\partial o_{j}}\) gets more interesting for a hidden layer neuron (the part in \({\color{green}green}\)).
@@ -98,12 +97,12 @@ I took a statistical approach to compare the result of regular backpropagation t
     <li><p>I trained and tested two identical networks for 200 epochs on MNIST dataset, 30 times.</p></li>
     <li><p>Each time starting from a new set of random weights (<var>w1</var>, <var>w2</var>, and <var>w2_feedback</var>) and new random samples from MNIST for training and testing. </p></li>
     <li><p>Both networks had the same learning rate of 0.07 which was tuned to get the best performance for regular backprop.</p></li>
-    <li><p><var>w2_feedback</var> is scaled up logarithmically with each epoch. This is where I deviate from the paper. I found out this results in faster convergence.</p></li>
+    <li><p><var>w2_feedback</var> is scaled up logarithmically with each epoch. This is where I deviate from the paper. I found that this results in faster convergence.</p></li>
     <li><p>The initial <var>w1</var>(input to hidden) and <var>w2</var>(hidden to output) were identical for both networks. </p></li>
     <li><p>Both networks are two layers with 784 input (28x28 pixel image) and 10 output units (0 to 9 digits). I experiment with different number of units in the hidden layer.</p></li>
     <li><p>The only difference between the networks is that I used a normally distributed random weights (<var>w2_feedback</var>) during backprop. 
-        <var>w2_feedback</var> is the \(\color{green}w_{j\ell}\) in our math above. Normally the same weights are used during forward and backward pass.
-        Here we used a random \(w_{j\ell}\)(<var>w2_feedback</var> in the code) in the backward pass. <var>w2_feedback</var> reminded constant during training.</p>
+        <var>w2_feedback</var> is the \(\color{green}w_{j\ell}\) in our equations above. Normally the same weights are used during forward and backward pass.
+        Here we used a random \(w_{j\ell}\)(<var>w2_feedback</var> in the code) in the backward pass. <var>w2_feedback</var> remained constant during training.</p>
     </li>
     <li><p>After each training-testing run, accuracy was measured and recorded on the test set. </p></li>
 </ul>
@@ -149,9 +148,9 @@ Results are reported in the table below.
     <figcaption class="figure-caption">Table.1</figcaption>
 </figure>
 <p>
-Pretty surprising that backprop with random feedback weights learns as well as vanilla backprop!
+It's pretty surprising that backprop with random feedback weights learns as well as vanilla backprop!
     In the case of 20 hidden units, it performs even better.
-    Here are some sample loss plot from training-testing cycles.
+    Here are some sample loss plots from training-testing cycles.
 </p>
 <figure class="figure" >
     <img style="max-width:49%" class="img-fluid zoomable" src="{{site.baseurl}}/assets/images/random_feedback/expr-3-loss.png">
@@ -164,14 +163,14 @@ Pretty surprising that backprop with random feedback weights learns as well as v
 </p>
 <p>
 I’m surprised not more people are talking about this. 
-    It seems like bakcpropagation is taken for granted. 
+    It seems like backpropagation is taken for granted. 
     I feel like this should open a new degree of freedom in designing new models,  
     and we should be able to exploit it somehow.
 </p>
 
 <h2>Post experiment soul searching</h2>
 <p>
-But why this results? I had an intuition that by using a random but fixed <var>w2_feedback</var> during backprop, 
+But why this result? I had an intuition that by using a random but fixed <var>w2_feedback</var> during backprop, 
     neurons in the hidden layer learn their incoming weights (<var>w1</var>) to minimize the \(\delta _{\ell}\) of neurons in the output layer that they happen to have a high outgoing weight to.
     This kind of explains why the network is still able to learn. Each neuron in the hidden layer is predetermined to fit to a specific output neuron by the random selection of feedback weights.
 </p>
@@ -225,8 +224,7 @@ To further test my hypothesis, I came up with an extreme case of it.
     <figcaption class="figure-caption">Table.2</figcaption>
 </figure>
 <p>
-Surprisingly again, not only the network performs just as well as regular backprop. 
-    (Even slightly better) It works even better than random w2_feedback. 
+Surprisingly again, not only did the network perform just as well as regular backprop (even slightly better), it worked even better than the random w2_feedback. 
     If this scales to larger networks and other topologies it could potentially save a lot of computation resource. 
     Here the amount of backprop computation from output to hidden layer was reduced by a factor of 20! Perhaps I’ll explore this in a future post.
 </p>
