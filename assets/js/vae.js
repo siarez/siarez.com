@@ -28,21 +28,15 @@ $(document).ready(function() {
         dec_out_weight = dl.Array2D.new(data["dec_out_weight"]["dim"], data["dec_out_weight"]["param"] );
         dec_out_bias = dl.Array1D.new(data["dec_out_bias"]["param"]) ;
 
-        image = generate(dl.Array1D.new([-0.2862, -7.1673, 7.9015, 0.7210, -1.2547, -1.3339, 5.2386, 5.9952, -13.7995, -2.0064]))
-        console.log(image)
-        $('#sample').append(renderMnistImage(image));
+        image_9 = generate(dl.Array1D.new([-0.2862, -7.1673, 7.9015, 0.7210, -1.2547, -1.3339, 5.2386, 5.9952, -13.7995, -2.0064]))
+        image_8 = generate(dl.Array1D.new([0.1307, 4.1141, 6.2771, 3.2629, 3.7982, 1.2015, 5.8397, 8.4124, -2.8188, 5.0266]))
+        
+        $('#mnist_sample').append(renderMnistImage(image_9));
+        $('#mnist_sample').append(renderMnistImage(image_8));
     });
-    runExample();
+
 })
 
-/** Runs the example. */
-function runExample() {
-    var a = dl.Array1D.new([1, 2, 3]);
-    var b = dl.Scalar.new(2);
-    var result = math.relu(math.sub(a, b));
-    // Option 1: With a Promise.
-    result.data().then(data => $("#divi").text(JSON.stringify(data)));
-}
 
 function generate(z){
     dec_hid = math.relu(math.add(math.vectorTimesMatrix(z, math.transpose(dec_hid_weight)), dec_hid_bias));
@@ -51,22 +45,31 @@ function generate(z){
 }
 
 function renderMnistImage(array) {
-  const width = 28;
-  const height = 28;
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  const float32Array = array.dataSync();
-  const imageData = ctx.createImageData(width, height);
-  for (let i = 0; i < float32Array.length; ++i) {
-    const j = i * 4;
-    const value = Math.round(float32Array[i] * 255);
-    imageData.data[j + 0] = value;
-    imageData.data[j + 1] = value;
-    imageData.data[j + 2] = value;
-    imageData.data[j + 3] = 255;
-  }
-  ctx.putImageData(imageData, 0, 0);
-  return canvas;
+    const width = 28;
+    const height = 28;
+    const canvas = document.createElement('canvas');
+    // Needed the scale canvas to scale up the image
+    const scaled_canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const scaled_ctx = scaled_canvas.getContext('2d');
+    scaled_ctx.imageSmoothingEnabled = false
+    scaled_ctx.mozImageSmoothingEnabled = false
+    scaled_ctx.webkitImageSmoothingEnabled = false
+    scaled_ctx.ImageSmoothingEnabled = false
+    scaled_ctx.scale(5, 5)
+    const float32Array = array.dataSync();
+    const imageData = ctx.createImageData(width, height);
+    for (let i = 0; i < float32Array.length; ++i) {
+        const j = i * 4;
+        const value = Math.round(float32Array[i] * 255);
+        imageData.data[j + 0] = value;
+        imageData.data[j + 1] = value;
+        imageData.data[j + 2] = value;
+        imageData.data[j + 3] = 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    scaled_ctx.drawImage(canvas, 0, 0);
+    return scaled_canvas;
 }
