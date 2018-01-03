@@ -18,46 +18,13 @@ const z_samples_variational = [[-1.8590235710144043, -0.24844303727149963, 0.039
 const z_vanilla = [ 16.2604, 0.0, 8.7685, 19.2652, 0.0, 0.0, 18.8555, 15.8918, 5.6524, 15.3134]
 const z_9 = z_samples_variational[5].slice();
 
-$(document).ready(function() {
-    console.log("hello")
-    
-    for (let i = 0; i < 10; ++i) {
-        // Adding sliders for adjusting z
-        let slider = $('<input type="range" min="-10" max="10" value="0" step="0.1" class="slider" id="range'+i+'" data-index='+i+'><span>0</span>')
-         slider.on("change mousemove", function() {
-            let val = $(this).val();
-            let idx = $(this).data("index");
-            let new_z = getSliderValues()
-            $(this).next().html(val);   // updates the labal         
-            new_z[idx] = val; 
-            setSliders(new_z);
 
-        });
-        $(".slidecontainer").append(slider);
-        
-    }
-    
-    function updateTweakedImage(z_representation){
-        new_image = generate(dl.Array1D.new(z_representation));
-        $('#mnist_sample_tweaked canvas').remove();
-        $('#mnist_sample_tweaked').append(renderMnistImage(new_image));
-    }
-    
-    function setSliders(z_representation){
-        $(".slidecontainer").children(".slider").each(function(){
-            $(this).val(z_representation[$(this).data("index")]);  
-            $(this).next().html($(this).val());   // updates the labal
-        });
-        updateTweakedImage(z_representation)
-    }
-    
-    function getSliderValues(){
-        values = []
-        $(".slidecontainer").children(".slider").each(function(){
-            values.push($(this).val()); 
-        });
-        return values;
-    }
+
+$(document).ready(function() {
+    console.log("hello");
+    createSliders($(".slidecontainer"));
+    createPixelGrid($(".pixel-picker-container"));
+    $('.pixel-picker-container').pixelPicker({update: pixelPickerUpdate});
 
     
     $.getJSON( "{{ site.baseurl }}/assets/json/model_params_variational.json", function( data ) {
@@ -71,7 +38,7 @@ $(document).ready(function() {
         dec_hid_bias = dl.Array1D.new(data["dec_hid_bias"]["param"]) ;
         dec_out_weight = dl.Array2D.new(data["dec_out_weight"]["dim"], data["dec_out_weight"]["param"] );
         dec_out_bias = dl.Array1D.new(data["dec_out_bias"]["param"]) ;
-        //Generating sample images.
+        //Generating sample images. A canvas for each digit.
         for (let idx=0; idx<10; idx++){            
             let canvas = $(renderMnistImage(generate(dl.Array1D.new(z_samples_variational[idx])), 2));
             canvas.attr("data-digit", idx);
@@ -89,12 +56,14 @@ $(document).ready(function() {
 
 
 function generate(z){
+    /*Takes take hidden representation and decoder parameters to generate an image*/
     dec_hid = math.relu(math.add(math.vectorTimesMatrix(z, math.transpose(dec_hid_weight)), dec_hid_bias));
     dec_out = math.sigmoid(math.add(math.vectorTimesMatrix(dec_hid, math.transpose(dec_out_weight)), dec_out_bias));
     return dec_out;
 }
 
-function renderMnistImage(array, scale_factor = 5 ) {
+function renderMnistImage(image_array, scale_factor = 5 ) {
+    /*Creates a 28x28 image canvas. It takes pixel values from `image_array`*/
     const width = 28;
     const height = 28;
     const canvas = document.createElement('canvas');
@@ -111,7 +80,7 @@ function renderMnistImage(array, scale_factor = 5 ) {
     scaled_ctx.webkitImageSmoothingEnabled = false
     scaled_ctx.ImageSmoothingEnabled = false
     scaled_ctx.scale(scale_factor, scale_factor)
-    const float32Array = array.dataSync();
+    const float32Array = image_array.dataSync();
     const imageData = ctx.createImageData(width, height);
     for (let i = 0; i < float32Array.length; ++i) {
         const j = i * 4;
@@ -124,4 +93,59 @@ function renderMnistImage(array, scale_factor = 5 ) {
     ctx.putImageData(imageData, 0, 0);
     scaled_ctx.drawImage(canvas, 0, 0);
     return scaled_canvas;
+}
+
+function createSliders(slidecontainer){
+    /*Creates sliders for tweaking z*/
+    for (let i = 0; i < 10; ++i) {
+        // Adding sliders for adjusting z
+        let slider = $('<input type="range" min="-10" max="10" value="0" step="0.1" class="slider" id="range'+i+'" data-index='+i+'><span>0</span>')
+         slider.on("change mousemove", function() {
+            let val = $(this).val();
+            let idx = $(this).data("index");
+            let new_z = getSliderValues()
+            $(this).next().html(val);   // updates the labal
+            new_z[idx] = val;
+            setSliders(new_z);
+
+        });
+        slidecontainer.append(slider);
+
+    }
+}
+
+function createPixelGrid(container){
+    for (let i=0; i < 28; i++){
+        let row = $('<div class="pixel-picker-row">');
+        for (let j=0; j < 28; j++){
+            row.append($('<div class="pixel-picker-cell"></div>'));
+        }
+        container.append(row);
+    }
+}
+
+function pixelPickerUpdate(map){
+    console.log(map);
+}
+
+function updateTweakedImage(z_representation){
+    new_image = generate(dl.Array1D.new(z_representation));
+    $('#mnist_sample_tweaked canvas').remove();
+    $('#mnist_sample_tweaked').append(renderMnistImage(new_image));
+}
+
+function setSliders(z_representation){
+    $(".slidecontainer").children(".slider").each(function(){
+        $(this).val(z_representation[$(this).data("index")]);
+        $(this).next().html($(this).val());   // updates the labal
+    });
+    updateTweakedImage(z_representation)
+}
+
+function getSliderValues(){
+    values = []
+    $(".slidecontainer").children(".slider").each(function(){
+        values.push($(this).val());
+    });
+    return values;
 }

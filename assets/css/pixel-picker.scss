@@ -1,0 +1,51 @@
+---
+
+---
+
+$width : 200px;
+$height : 200px;
+$num_rows: 28;
+$num_cols: 28;
+
+.pixel-picker-container {
+  box-sizing: border-box;
+  background-color: #fff;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  width: $width;
+}
+
+.pixel-picker-row {
+  margin: 0;
+  width: 100%;
+  display: table;
+  clear: both;
+  height: $height/$num_rows;
+}
+
+.pixel-picker-cell {
+  display: table-cell;
+  //padding-top: 5%;
+  height: 100%;
+  cursor: pointer;
+  background-color: #000000;
+  box-shadow: inset -1px -1px 0 0 rgba(255, 255, 255, 0.2);
+  box-sizing: border-box;
+  transition: background-color 0.05s ease-in;
+}
+
+.pixel-picker-row:first-child .pixel-picker-cell {
+  box-shadow: inset -1px -1px 0 0 rgba(255, 255, 255, 0.2),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.pixel-picker-row .pixel-picker-cell:first-child {
+  box-shadow: inset -1px -1px 0 0 rgba(255, 255, 255, 0.2),
+              inset 1px 0 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.pixel-picker-row:first-child .pixel-picker-cell:first-child {
+  box-shadow: inset -1px -1px 0 0 rgba(255, 255, 255, 0.2),
+              inset 1px 1px 0 0 rgba(255, 255, 255, 0.2);
+}

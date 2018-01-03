@@ -1,6 +1,6 @@
 ---
 layout: post
-title: variational autoencoder playground
+title: variational autoencoder interactive demos with deeplearn.js
 disqus_identifier : d8b05c89-d7aa-4f19-897b-7c52914a030c
 feature: false
 publish: false
@@ -11,6 +11,8 @@ image:
 ---
 
 
+
+
 <p>Hello Deaplearn.js VAE!</p>
 <div> 
     <div id="mnist_sample" style="display: inline-block;"></div>
@@ -18,5 +20,40 @@ image:
     <div class="slidecontainer"></div>
 </div>
 
+
+<h2>Inro</h2>
+<p>
+    If you are here, you probably know variational autoencoders are a different animal than vanilla autoencoders.
+    It took me a while to get my head around them. The number of blog posts on the topic is itself evident that I wasn't alone in my struggle.
+    In the end, what really helped me understand them, was this <a href="https://www.youtube.com/watch?v=7G4_Y5rsvi8" target="_blank">lecture by Ali Ghodsi</a> of University of Waterloo.
+    He does an excellent job explaining the variational method and deriving all the mathematical formulas step by step.
+    But he doesn't get to training and “reparameterization trick”.
+</p>
+<p>
+    Since the network has random sampling at heart, it is at first not obvious how to do error backpropagation.
+    “reparameterization trick” is a clever way of getting random sampling out of the error backpropagation path.
+    To understand it, just compare the two graphs on the hero image on top of this page, after you've watched Ali Ghodsi's lecture.
+</p>
+<p>
+    I guess you are here because I promised an iterative demo, so let's get to it.
+</p>
+<h2>Demos</h2>
+<p>
+    First a little bit about what you are seeing. <br>
+    In my quest to understand VAEs, I coded one up from strach using PyTorch.
+    (<a href="https://github.com/siarez/VAE" target="_blank">GitHub link here</a>)
+    My script has a little function that saves model parameters (i.e. weights and biases) in a JSON file.
+    I've used it to save the model parameters after training.
+    Those parameters are now loaded into Deeplearn.js variables, and are used to create the interactive visualizations in this demo.
+
+</p>
+
+<div class="pixel-picker-container"></div>
+
+<p>Has difficaulty reconstructing things other than digits.</p>
+
+
 <script src="https://unpkg.com/deeplearn"></script>
+<script src="{{ site.baseurl }}/assets/js/pixel-picker.js" type="text/javascript"  defer='defer'></script>
 <script src="{{ site.baseurl }}/assets/js/vae.js"  type="text/javascript" defer='defer'></script>
+
