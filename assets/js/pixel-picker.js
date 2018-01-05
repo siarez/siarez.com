@@ -79,6 +79,7 @@
       return cell.css('background-color', arrayToRgb(currentColor));
     };
 
+
     // Update whatever is handling the updated map of colors
     updateHandler = function(rowIndex, cellIndex, cell, dontHandle) {
       var handler = settings.update;
@@ -252,6 +253,21 @@
         };
       });
     });
+
+    $('#reset-btn', this).on('click', function(){
+        currentColor = parseColor(settings.eraserColor)
+        rows = $(this).parent().find(settings.rowSelector);
+        rows.each(function(rowIndex, row) {
+            var cells = $(row).find(settings.cellSelector);
+            cells.each(function(cellIndex, cell) {
+                map[rowIndex][cellIndex] = [0, 0, 0];
+                applyColor($(cell));
+            });
+        });
+        var handler = settings.update;
+        handler(map);
+    });
+
 
     return this;
 

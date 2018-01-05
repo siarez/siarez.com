@@ -21,11 +21,9 @@ const z_9 = z_samples_variational[5].slice();
 
 
 $(document).ready(function() {
-    console.log("hello");
     createSliders($(".slidecontainer"));
     createPixelGrid($(".pixel-picker-container"));
     $('.pixel-picker-container').pixelPicker({update: pixelPickerUpdate});
-
     
     $.getJSON( "{{ site.baseurl }}/assets/json/model_params_variational.json", function( data ) {
         model_params = data;
@@ -124,8 +122,15 @@ function createPixelGrid(container){
     }
 }
 
+
 function pixelPickerUpdate(map){
-    console.log(map);
+    pixels = [];
+    map.forEach(function(row){
+        row.forEach(function(pixel){
+            pixels.push(arrayEqual(pixel, [255, 255, 255]) ? 1 : 0 )
+        });
+    });
+    console.log(pixels);
 }
 
 function updateTweakedImage(z_representation){
@@ -148,4 +153,10 @@ function getSliderValues(){
         values.push($(this).val());
     });
     return values;
+}
+
+function arrayEqual(a, b) {
+    return a.length === b.length && a.every(function(elem, i) {
+        return elem === b[i];
+    });
 }
