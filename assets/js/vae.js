@@ -22,9 +22,8 @@ const z_9 = z_samples_variational[5].slice();
 
 $(document).ready(function() {
     createSliders($(".slidecontainer"));
-    createPixelGrid($(".pixel-picker-container"));
-    $('.pixel-picker-container').pixelPicker({update: pixelPickerUpdate});
     
+    //Loads the JSON file containing the model parameters
     $.getJSON( "{{ site.baseurl }}/assets/json/model_params_variational.json", function( data ) {
         model_params = data;
         // Creating weights and biases from the json file 
@@ -45,8 +44,11 @@ $(document).ready(function() {
             });
             $('#mnist_sample').append(canvas);
         }
-        
+        //initialize slider positions
         setSliders(z_samples_variational[0])
+        // Creates the drawing pad
+        createPixelGrid($(".pixel-picker-container"));
+        $('.pixel-picker-container').pixelPicker({update: pixelPickerUpdate});
         
     });
 
@@ -54,10 +56,17 @@ $(document).ready(function() {
 
 
 function generate(z){
-    /*Takes take hidden representation and decoder parameters to generate an image*/
-    dec_hid = math.relu(math.add(math.vectorTimesMatrix(z, math.transpose(dec_hid_weight)), dec_hid_bias));
-    dec_out = math.sigmoid(math.add(math.vectorTimesMatrix(dec_hid, math.transpose(dec_out_weight)), dec_out_bias));
+    /* Takes take hidden representation and decoder parameters to generate an image */
+    let dec_hid = math.relu(math.add(math.vectorTimesMatrix(z, math.transpose(dec_hid_weight)), dec_hid_bias));
+    let dec_out = math.sigmoid(math.add(math.vectorTimesMatrix(dec_hid, math.transpose(dec_out_weight)), dec_out_bias));
     return dec_out;
+}
+
+function encode(image){
+    /* Encodes the image. i.e. calculates the hidden representaion z. It includes mu and sigma */
+    let enc_hid = math.relu(math.add(math.vectorTimesMatrix(image, math.transpose(enc_in_weight)), enc_in_bias));
+    let enc_out = math.add(math.vectorTimesMatrix(enc_hid, math.transpose(enc_hid_weight)), enc_hid_bias);
+    return enc_out;
 }
 
 function renderMnistImage(image_array, scale_factor = 5 ) {
@@ -124,13 +133,23 @@ function createPixelGrid(container){
 
 
 function pixelPickerUpdate(map){
+    //This is called every time pixel picker (the drawing board) is updated.
     pixels = [];
     map.forEach(function(row){
         row.forEach(function(pixel){
             pixels.push(arrayEqual(pixel, [255, 255, 255]) ? 1 : 0 )
         });
     });
-    console.log(pixels);
+    //console.log(pixels);
+    encoding = encode(dl.Array1D.new(pixels));
+    encoding_mu = encoding.dataSync().slice(0,10);
+    setSliders(encoding_mu);
+    /*
+    new_image = generate(dl.Array1D.new(encoding_mu));
+    $('#mnist_sample_tweaked canvas').remove();
+    $('#mnist_sample_tweaked').append(renderMnistImage(new_image));
+    */
+    //console.log(encoding.dataSync().slice(0,10));
 }
 
 function updateTweakedImage(z_representation){
@@ -140,14 +159,16 @@ function updateTweakedImage(z_representation){
 }
 
 function setSliders(z_representation){
+    //Sets sliders to a new position and updates the generates image
     $(".slidecontainer").children(".slider").each(function(){
         $(this).val(z_representation[$(this).data("index")]);
         $(this).next().html($(this).val());   // updates the labal
     });
-    updateTweakedImage(z_representation)
+    updateTweakedImage(z_representation);
 }
 
 function getSliderValues(){
+    //Returns an array containing slider values.
     values = []
     $(".slidecontainer").children(".slider").each(function(){
         values.push($(this).val());

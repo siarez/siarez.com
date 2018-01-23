@@ -276,3 +276,7 @@ img.zoomable {
     background: $accent-color1;
     cursor: pointer;
 }
+
+#mnist_sample canvas {
+    cursor: pointer;
+}
