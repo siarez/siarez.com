@@ -254,7 +254,7 @@
       });
     });
 
-    $('#reset-btn', this).on('click', function(){
+    $('#reset-btn').on('click', function(){
         currentColor = parseColor(settings.eraserColor)
         rows = $(this).parent().find(settings.rowSelector);
         rows.each(function(rowIndex, row) {

@@ -7,13 +7,28 @@ $height : 200px;
 $num_rows: 28;
 $num_cols: 28;
 
-.pixel-picker-container {
+.pixel-picker-container{
+    width: 100%;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    position: relative; /* If you want text inside of it */
+}
+.pixel-container{
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;    
+}
+
+
+.pixel-container {
   box-sizing: border-box;
   background-color: #fff;
   -webkit-user-select: none;
   -moz-user-select: none;
+  //display: inline-grid;
   user-select: none;
-  width: $width;
+  //width: $width;
 }
 
 .pixel-picker-row {
@@ -21,7 +36,11 @@ $num_cols: 28;
   width: 100%;
   display: table;
   clear: both;
-  height: $height/$num_rows;
+  height: percentage(1/$num_rows);
+}
+
+#reset-btn{
+    width:100%;
 }
 
 .pixel-picker-cell {
