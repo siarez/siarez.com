@@ -3,6 +3,7 @@
 ---
 
 $accent-color1 : #FFCC4F;
+$accent-color2 : #007c5b;
 
 @mixin font-feature($liga: 0, $stylisticSet: "ss02") {
   -webkit-font-feature-settings: "liga" $liga, $stylisticSet 1;
@@ -142,6 +143,7 @@ var {
   font-family: "Lucida Console", Monaco, monospace;
   font-size: 1.8rem;
   font-style: normal;
+  color: $accent-color2;    
 }
 
 li {
@@ -177,7 +179,7 @@ p a, a.nav-link, li a{
   &:hover {
     color: #f5c77e;
     text-decoration: none;
-    border-left: 1px solid black;
+    outline: 1px solid black;
   }
 }
 
