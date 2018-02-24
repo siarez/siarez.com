@@ -1,0 +1,98 @@
+---
+layout: post
+title: dsp audio amplifier
+disqus_identifier : 77d14f12-4c40-4cb0-8e3d-e82ecf5134a3
+feature: false
+publish: true
+category: misc
+image:
+    url: /assets/images/dsp-amp.jpg
+    alt: twins
+
+---
+<h2>Intro</h2>
+<p>
+    <span class="dropcap">I</span>n a previous life, I was the founder of <a href="www.sereneaudio.com" target="_blank" ></a>Serene Audio.</a> 
+    Where we made the best compact desktop speakers. 
+    Part of what made the speakers so great was their built-in amplifier that I designed. 
+    It had a DSP chip which allowed me to tune the amplifier to the specific properties of the transducer and their enclosure.
+    We decided to shut Serene Audio down last year. I was a difficult decision, but that's another story.
+</p>
+<p>
+    I decided to open the design of the amplifier for the benefit of the DIY audio community. 
+    I have attached all the <a href="{{ site.baseurl }}/assets/misc/Serene_Audio_DSPAmp_PCB_4.1.zip">gerber files</a>, but also the DipTrace schematics and layout files. 
+    DipTrace is the software that I used, and I highly recommend it. 
+    It is very user friendly, but also affordable. 
+    You can use it to a modify and adapt the design for your own needs.   
+</p>
+<h2>Note on emi</h2>
+<p>
+    We have been through 4 iterations of this design. So most of the kinks are ironed out, but there are some things to consider. 
+    First, this uses a digital amplifier chip (TAS5708), and EMI is a concern with D class amps.
+    I have not done any EMI testing, however I have paid close attention to controlling EMI in circuit and layout design.
+</p>
+<h2>Hardware</h2>
+<img style="max-width:100%" src="{{ site.baseurl }}/assets/images/amp-gerber.png" />
+<p>
+    The layout is a 4 layer board. Where 2 middle layers are ground &amp; 3.3V, and the top &amp; bottom layers are signal layers.
+    I have paid close attention to the return paths of currents to avoid EMI, 
+    but I've also tried to isolate the analog and digital return paths to improve SNR.
+    Some of the features are:
+</p>
+<ul>
+<li><p>Header for easy programming of the MCU with Atmel AVR ISP mk2 </p></li>
+<li><p>I2C header for possibly communicating with external devices</p></li>
+<li><p>I2S header for by passing PCM3070 internal ADC. 
+    (e.g. If you use your computer as a source, you can add a USB to I2S chip to eliminate the ADC and improve SNR)</p></li>
+<li><p>Analog audio input headers. PCM3070 has 3 stereo inputs. One is routed to the 3.5mm jack, but two are available in the headers.</p></li>
+<li><p>The amp can deliver 20W/channel to 8Ohm loads.</p></li>
+<li><p>It can also work with a voltage range of 12V to 24V.</p></li>
+</ul>
+<p>
+    The main components of the circuit are:
+</p>
+<ol>
+<li><p>An Atmel atmega328p MCU which is the brain of the system.</p> </li>
+<li><p>Texas Instrument's PCM3070 which is the I use for ADC, DAC, headphone out, and DSP</p></li>
+<li><p>Texas Instrument's TAS5708 which is a closed-loop 2 channel D-class amp with I2S interface. </p></li>
+</ol>
+<p>  
+    The MCU holds the configuration for both PCM3070 and TAS5708. 
+    It communicates with these chips through I2C interface.
+    It also interfaces with the digital encoder and switch that acts and volume knob and power button.
+    The subwoofer output also has a built-in switch using which the MCU detects when a subwoofer cable is plugged in and then activates a high-pass filter in PCM3070.
+</p>
+<h2>Firmware</h2>
+<p>
+    What makes the amp really useful is its programmability. 
+    All the DSP coefficients and configurations are stored on the MCU itself.
+    The MCU can be programmed using an Atmel AVR ISP mk2 through the header right behind the encoder.
+    I used the Arduino platform for developing the firmware. Here is a link the <a href="https://github.com/siarez/SereneAudio-Amp-Firmware" target="_blank">Github repo</a> of the firmware.
+    The firmware consists of for files:
+</p>
+<ol>
+    <li><p><var>MCU_code.ino</var> which is the main file that has all the logic for handling interupts and configuring PCM3070 and TAS5708.</p></li>
+    <li><p><var>REG_Section_Program.h</var> which has all the configurations of PCM3070 (Things like clock configurations, signal routing, gains, etc.) </p></li>
+    <li><p><var>TAS5708.h</var> which has all the configurations and DSP coefficients of the TAS5708 chip. (TAS5708 has a simple DSP buit-in, but I'm not using it.)</p></li>
+    <li><p><var>main_Rate48_pps_driver.h</var> This file contains the DSP coefficients for the two miniDSP cores inside PCM3070.</p></li>
+</ol>
+<h2>Customizing the DSP</h2>
+<p>
+    Texas Intstruments offers a drag and drop graphical UI that makes programming PCM3070 significatly easier. 
+    It is called PurePath Studio. You can download it for free from their website.
+    You can use this software to configure the DSP to your heart's content to make your speakers really shine.
+    The contents of <var>main_Rate48_pps_driver.h</var> are directly copied over from a file generated by PurePath Studio by the same name.
+    <br>Note: When copying over the data, make sure you add the <var>PROGMEM</var> modifier. It directs the compiler to store the values in flash memory instead of SRAM.
+</p>
+<h2>Final notes</h2>
+<p>
+    I have some PCBs left over from our last batch. I can mail you one for free, just shoot me an email if you want one.
+    To make your own, you'll have to order your own components and solder paste stensil. 
+    Then manually place the components after applying the paste, and bake. 
+    It is a very delicate process, but I had success on my first try.    
+</p>
+<p>
+    Let me know in the comments if you have any questions or if there is anything I missed.
+</p>
+
+
