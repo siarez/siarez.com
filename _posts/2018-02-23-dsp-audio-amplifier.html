@@ -16,11 +16,11 @@ image:
     Where we made the best compact desktop speakers. 
     Part of what made the speakers so great was their built-in amplifier that I designed. 
     It had a DSP chip which allowed me to tune the amplifier to the specific properties of the transducers and their enclosure.
-    We decided to shut Serene Audio down last year. I was a difficult decision, but that's another story.
+    We decided to shut Serene Audio down last year. It was a difficult decision, but that's another story.
 </p>
 <p>
     I decided to open the design of the amplifier for the benefit of the DIY audio community. 
-    I have attached all the <a href="{{ site.baseurl }}/assets/misc/Serene_Audio_DSPAmp_PCB_4.1.zip">gerber files</a>, but also the DipTrace schematics and layout files. 
+    I have attached all the <a href="{{ site.baseurl }}/assets/misc/Serene_Audio_DSPAmp_PCB_4.1.zip">gerber files</a>, but also the DipTrace <a href="{{ site.baseurl }}/assets/images/amp-schematic.jpg">schematics</a>, layout, and BOM files. 
     DipTrace is the software that I used, and I highly recommend it. 
     It is very user-friendly, but also affordable. 
     You can use it to a modify and adapt the design for your own needs.   
@@ -44,23 +44,25 @@ image:
 <li><p>I2C header for possibly communicating with external devices</p></li>
 <li><p>I2S header for by passing PCM3070 internal ADC. 
     (e.g. If you use your computer as a source, you can add a USB to I2S chip to eliminate the ADC and improve SNR)</p></li>
-<li><p>Analog audio input headers. PCM3070 has 3 stereo inputs. One is routed to the 3.5mm jack, but two are available in the headers.</p></li>
+<li><p>Analog audio input headers. PCM3070 has 3 stereo inputs. One is routed to the 3.5mm jack. The other two are available in the headers, and they can be combined to form a balanced input.</p></li>
 <li><p>The amp can deliver 20W/channel to 8Ohm loads.</p></li>
 <li><p>It can also work with a voltage range of 12V to 24V.</p></li>
+<li><p>Compact design; the PCB is about 3x2 inches.</p></li>
+<li><p>PIO header</p></li>
 </ul>
 <p>
     The main components of the circuit are:
 </p>
 <ol>
 <li><p>An Atmel atmega328p MCU which is the brain of the system.</p> </li>
-<li><p>Texas Instrument's PCM3070 which is the I use for ADC, DAC, headphone out, and DSP</p></li>
+<li><p>Texas Instrument's PCM3070 which I use for ADC, DAC, headphone out, and DSP</p></li>
 <li><p>Texas Instrument's TAS5708 which is a closed-loop 2 channel D-class amp with I2S interface. </p></li>
 </ol>
 <p>  
     The MCU holds the configuration for both PCM3070 and TAS5708. 
     It communicates with these chips through I2C interface.
-    It also interfaces with the digital encoder and switch that acts and volume knob and power button.
-    The subwoofer output also has a built-in switch using which the MCU detects when a subwoofer cable is plugged in and then activates a high-pass filter in PCM3070.
+    It also interfaces with the digital encoder and switch that acts as volume knob and power button.
+    The subwoofer output also has a built-in switch, using which, the MCU detects when a subwoofer cable is plugged in and then activates a high-pass filter in PCM3070.
 </p>
 <h2>Firmware</h2>
 <p>
