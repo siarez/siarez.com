@@ -1,0 +1,33 @@
+---
+layout: post
+title: Nod-o-Meter
+feature: false
+publish: true
+category: AI
+image:
+    url: /assets/images/Bruce.jpg
+    alt: twins
+
+---
+
+<video id="player" style="display: none" autoplay></video>
+<button id="capture">Reset</button>
+<canvas id="canvas" width=640 height=480></canvas>
+<p>
+    What you just experienced is a demo a project where I trained a model to detect nods.
+    The model was created and trained in Pytorch and then ported to Deeplearn.js 
+    to run in the browser.
+</p>
+<p>
+    The green bar is the probability of a nod as inferred by the model. 
+    When the bar extends past the black notch, we can be fairly certain that we have had a nod.
+</p>
+<p>
+    There is a slight (~1.5s) delay between a nod and its detection.<br>
+    p.s. The demo usually runs smoother in Chrome.
+</p>
+
+
+<script src="https://unpkg.com/deeplearn"></script>
+<script src="{{ site.baseurl }}/assets/js/BRFv4_JS_TK190218_v4.0.5_trial.js"  type="text/javascript"></script>
+<script src="{{ site.baseurl }}/assets/js/nod.js"  type="text/javascript" defer='defer'></script>
