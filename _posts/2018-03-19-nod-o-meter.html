@@ -10,9 +10,15 @@ image:
 
 ---
 
+<p>This demo runs smoother in Chrome.</p>
+<div class="row">
 <video id="player" style="display: none" autoplay></video>
-<button id="capture">Reset</button>
-<canvas id="canvas" width=640 height=480></canvas>
+<button id="capture" class="btn btn-secondary btn-lg" style="width: 100%">Reset</button>
+    <div class="nod_vid_container">
+        <canvas id="canvas" width=640 height=480></canvas>
+    </div>
+</div>
+
 <p>
     What you just experienced is a demo a project where I trained a model to detect nods.
     The model was created and trained in Pytorch and then ported to Deeplearn.js 
@@ -23,8 +29,10 @@ image:
     When the bar extends past the black notch, we can be fairly certain that we have had a nod.
 </p>
 <p>
-    There is a slight (~1.5s) delay between a nod and its detection.<br>
-    p.s. The demo usually runs smoother in Chrome.
+    There is a slight (~2s) delay between a nod and its detection.<br>
+</p>
+<p>
+    More details to come … 
 </p>
 
 

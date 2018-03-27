@@ -311,3 +311,18 @@ input[type=range]::-moz-range-track {
 #mnist_reconstruction > canvas {
     width: 100%;
 }
+.nod_vid_container {
+   background-color: $accent-color1;
+   position: relative;
+   width: 100%;
+   padding-top: 75%; /* 4:3 Aspect Ratio */
+}
+
+#canvas {
+    position:  absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;    
+    width: 100%
+}
