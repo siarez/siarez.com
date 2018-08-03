@@ -67,13 +67,6 @@ image:
     After it is done learning, you’ll have it go through each question pair in the test set and fill out the is_duplicate column.
     There are 2,345,796 question pairs in the test set.
 </p>
-<p>
-    Recently, I decided to pick up on an old passion of mine which is AI and ML.
-    I also find Natural Language Processing/Understanding (NLP/U) very fascinating.
-    This project was the sweet spot of all those things.
-    Plus, I could use it as an excuse to dust off my Python skills, and learn Tensorflow.
-    I decided to use a couple of different models on this problem, all using Tensorflow.
-</p>
 <h2>linear regression on cosine similarity</h2>
 <p>
     First to get my feet wet and establish a baseline, I coded up a very basic logistic regression model in Tensorflow.
@@ -116,11 +109,10 @@ image:
     That would have a definitely improved the result (as described by Abhishek <a href="https://www.linkedin.com/pulse/duplicate-quora-question-abhishek-thakur" target="_blank" >here</a>),
     but I wanted to try something sexier than logistic regression.
 </p>
+{%comment%}
 <h2>RNN fun</h2>
 <p>
-    Since my renewed interest in machine learning, I came across a very interesting concept of recurrent neural networks or RNNs.
-    Simply put, RNNs are a type of network that receives as part of its input, its output from the previous time step.
-    So they are great for learning variable length sequences and that is what sentences are.
+    RNNs are great for learning variable length sequences (e.g. sentences), so they are great for language.
     <a href="http://karpathy.github.io/2015/05/21/rnn-effectiveness/" target="_blank">Here is a great post, if you want to learn more about RNNs</a>.
 </p>
 <p>
@@ -132,17 +124,19 @@ image:
 <p>I added a (NUL) ASCII character before is_duplicate to help the RNN learn that it should only output either a 0 or a 1 after the (NUL) and not any other character.
     My aim was to keep pumping these sequences in the RNN and hope it learns to predict is_duplicate correctly.
     (Yea, I'm that optimistic.)
+    They call this a many-to-one task. Where the RNN is a fed a sequence but outputs one prediction.
 </p>
 <p>
     This is a pretty bad strategy for many reasons.
-    For one, because RNNs tend to put more weight on the last inputs in the sequence.
-    So q1 would have less bearing on the prediction than q2, just because it is seen earlier and at the time of prediction is already distant memory.
+    For one, because RNNs tend to put more weight on the last inputs in the sequence. That is true even for LSTMs which are designed to overcome this limitation.
+    So q1 would have less bearing on the prediction than q2, just because it is seen earlier and at the time of prediction is already a “distant memory”.
     There are ways around this like bi-directional RNNs.
     But, my goal was more to play around with an RNN than to create a good model, so I stopped spending more time on this.
     I can report that the model did learn to predict ones and zeros, but I didn’t spend enough effort to measure its performance.
     From looking at the output, I was pretty sure it wasn’t going to be impressive.
     So I moved to my next shiny strategy.
 </p>
+{%endcomment%}
 <h2>Decomposable Attention Model</h2>
 <p>
     One day during my morning swim in arxiv.org, I came across a curious paper titled:
@@ -153,7 +147,7 @@ image:
 <p>
     The model was originally tested on the Stanford Natural Language Inference (SNLI) dataset by the authors of the paper.
     I adapted this model for use in the Quora competition. Fig. 3 below depicts the model.
-    Notice that the model is symmetric, and I didn’t draw the left side.
+    Please note that the model is symmetric, and I didn’t draw the left side.
     (In my implementation, F, G, and H are each two layers deep. So this is not a very deep model overall. )
 </p>
 <figure class="figure">
