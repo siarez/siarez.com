@@ -41,7 +41,15 @@ $(document).ready(function() {
             let canvas = $(renderMnistImage(generate(dl.Array1D.new(z_samples_variational[idx])), 2));
             canvas.attr("data-digit", idx);
             canvas.on("click", function(){
-                setSliders(z_samples_variational[$(this).data("digit")]) ;
+                // Samples from the latent distribution of the clicked digit
+                let sampled_z = [];
+                let digit = $(this).data("digit");
+                for (let z_idx=0; z_idx<z_samples_variational.length; z_idx++){
+                    let mean = z_samples_variational[digit][z_idx];
+                    let sigma = z_samples_variational_sigma[digit][z_idx];
+                    sampled_z.push(dl.randomNormal([1], mean, sigma).dataSync());
+                }
+                setSliders(sampled_z) ;
             });
             $('#mnist_sample').append(canvas);
         }
@@ -110,7 +118,7 @@ function createSliders(slidecontainer){
             let val = $(this).val();
             let idx = $(this).data("index");
             let new_z = getSliderValues()
-            $(this).next().html(val);   // updates the labal
+            $(this).next().html(val);   // updates the label
             new_z[idx] = val;
             setSliders(new_z);
 
@@ -139,8 +147,17 @@ function pixelPickerUpdate(map){
         });
     });
     //console.log(pixels);
-    encoding = encode(dl.Array1D.new(pixels));
-    encoding_mu = encoding.dataSync().slice(0,10);
+    let encoding = encode(dl.Array1D.new(pixels));
+    let encoding_mu = encoding.dataSync().slice(0,10);
+    let encoding_sigma = encoding.dataSync().slice(10,20);
+
+    let sampled_z = []
+    for (let z_idx=0; z_idx<encoding_mu.length; z_idx++){
+        let mean = encoding_mu[z_idx];
+        let sigma = encoding_sigma[z_idx]/10;
+        sampled_z.push(dl.randomNormal([1], mean, sigma).dataSync());
+    }
+    
     setSliders(encoding_mu);
 }
 
