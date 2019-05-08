@@ -33,15 +33,16 @@ Let’s take a refresher on how backprop works by diving straight into the math,
 </p>
 <p>
 The first equation tells us how to calculate the change in Error \(E\) as we change a weight \(w_{ij}\) in the network.
-Knowing that, the second equation calculates the amount that the weight needs to be adjusted \(\Delta w_{ij}\).
-It simply multiplies the derivative from the first equation by the learning rate \(\eta\).
+\(o_{i}\) is the output of sigmoid activation function (In this post we have assumed activations are sigmoid).    
+The second equation calculates the amount that the weight needs to be adjusted \(\Delta w_{ij}\).
+It simply multiplies the partial derivative from the first equation by the learning rate \(\eta\).
 The (-) sign is there so the adjustment of the weight is in the direction of decreasing \(E\).
 </p>
 
 <p>
 So far easy peasy, because the juicy part is hiding in the calculation of  \(\delta \).
 It has two terms: \(\frac {\partial E}{\partial o_{j}}\) and \(\frac {\partial o_{j}}{\partial {\text{net}}_{j}}\).
-You can see \(\delta \) is calculated differently for the output layer than the hidden layers.
+You can see \(\delta \) is calculated differently for the output layer than the hidden(inner) layers.
 The \(\frac {\partial o_{j}}{\partial {\text{net}}_{j}}\) is the same for both output and hidden layers.
 It is the \(o_{j}(1-o_{j})\) that you see on the right hand side which is the derivative of our sigmoid activation function.
 </p>
@@ -90,8 +91,8 @@ Now with that out of the way let get to the experiment.
 </p>
 <h2>Experiment setup</h2>
 <p>
-I took a statistical approach to compare the result of regular backpropagation to backpropagation using random feedback, 
-    so the code repeats the training-testing cycle 30 times and the results are used for a statistical significant test. 
+To compare the result of regular backpropagation to backpropagation using random feedback, 
+    my code repeats the training-testing cycle 30 times and the results are used for a statistical significant test. 
     In each experiment:
 </p>
 <ul>
@@ -101,14 +102,14 @@ I took a statistical approach to compare the result of regular backpropagation t
     <li><p><var>w2_feedback</var> is scaled up logarithmically with each epoch. This is where I deviate from the paper. I found that this results in faster convergence.</p></li>
     <li><p>The initial <var>w1</var>(input to hidden) and <var>w2</var>(hidden to output) were identical for both networks. </p></li>
     <li><p>Both networks are two layers with 784 input (28x28 pixel image) and 10 output units (0 to 9 digits). I experiment with different number of units in the hidden layer.</p></li>
-    <li><p>The only difference between the networks is that I used a normally distributed random weights (<var>w2_feedback</var>) during backprop. 
+    <li><p>The only difference between the two networks is that I used normally distributed random weights (<var>w2_feedback</var>) during backprop. 
         <var>w2_feedback</var> is the \(\color{green}w_{j\ell}\) in our equations above. Normally the same weights are used during forward and backward pass.
-        Here we used a random \(w_{j\ell}\)(<var>w2_feedback</var> in the code) in the backward pass. <var>w2_feedback</var> remained constant during training.</p>
-    </li>
+        Here we used a random \(w_{j\ell}\)(<var>w2_feedback</var> in the code) in the backward pass. </p></li>
+    <li><p><var>w2_feedback</var> remained constant during training.</p></li>
     <li><p>After each training-testing run, accuracy was measured and recorded on the test set. </p></li>
 </ul>
 <p>
-After the experiment, t-test is performed on recorded accuracies of each run to see if there is a significant difference in performance. 
+After 30 runs, t-test is performed on recorded accuracies of each run to see if there is a significant difference in performance. 
 Results are reported in the table below.
 </p>
 <h2>Results</h2>
@@ -182,7 +183,7 @@ But why this result? I had an intuition that by using a random but fixed <var>w2
 </p>
 <figure class="figure" >
     <img style="max-width:100%" class="mx-auto d-block" src="{{site.baseurl}}/assets/images/random_feedback/pearson-r.png">
-    <figcaption class="figure-caption">A simple feed forward neural net</figcaption>
+    <figcaption class="figure-caption">Top: Loss plot. Bottom: Pearson's correlation between forward weights and backward random weights. </figcaption>
 </figure>
 <p>You can see that Pearson’s r increases as loss decreases, and it usually hovers around 0.75±0.05 by the end of the training. 
     So there is some truth to my hypothesis. How much truth? r = 0.75 you could say!
